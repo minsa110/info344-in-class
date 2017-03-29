@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        fetch("http://localhost:8000/zips/city/seattle")
+            .then(function(resp) {
+                return resp.json()
+            })
+            .then(function(data) {
+                for(var i = 0; i < data.length; i++) {
+                    var obj = data[i];
+                    var node = document.createElement("LI");
+                    var textnode = document.createTextNode(obj.zip);
+                    node.appendChild(textnode);
+                    document.getElementById("zip-codes").appendChild(node);
+                    // console.log(obj.zip);
+                }
+            })
+            .catch(function(err) {
+                console.error(err)
+            })
+    </script>
+    <form action="">
+        City:<br>
+        <input type="text" value="Seattle">
+        <input type="submit" value="Submit">
+    </form>
+    <br>
+    Zip Codes:
+    <p id="zip-codes">
+    </p>
+</body>
+</html>
