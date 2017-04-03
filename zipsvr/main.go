@@ -57,7 +57,8 @@ func main() {
 	}
 
 	// JSON decoding
-	f, err := os.Open("../data/zips.json") // this opens the file
+	// f, err := os.Open("../data/zips.json") // this opens the file --no need to do this since cp...
+	f, err := os.Open("zips.json")
 	if err != nil {
 		log.Fatal("error oepning zips file: " + err.Error())
 	}
