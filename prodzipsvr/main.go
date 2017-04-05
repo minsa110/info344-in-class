@@ -122,7 +122,7 @@ func main() {
 	if len(port) == 0 {
 		port = defaultPort
 	}
-	addr := fmt.Sprintf("%s:%s", host, port)
+	addr := fmt.Sprintf("%s:%s", host, port) // so that we don't need to set ADDR
 
 	zips, err := loadZipsFromCSV("zips.csv")
 
