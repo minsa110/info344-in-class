@@ -2,12 +2,17 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"strings"
 
+	"encoding/json"
+
+	"github.com/go-redis/redis"
 	"golang.org/x/net/html"
 )
 
@@ -68,17 +73,49 @@ func getPageSummary(URL string) (*PageSummary, error) {
 	} //for each token
 } //getPageSummary()
 
+type HandlerContext struct {
+	redisClient *redis.Client
+}
+
 //SummaryHandler handles the /v1/summary resource
-func SummaryHandler(w http.ResponseWriter, r *http.Request) {
+// receiver = ctx; can now type: "ctx."... in here
+func (ctx *HandlerContext) SummaryHandler(w http.ResponseWriter, r *http.Request) {
 	URL := r.FormValue("url")
 	if len(URL) == 0 {
 		http.Error(w, "please supply a `url` query string parameter", http.StatusBadRequest)
 		return
 	}
 
-	//TODO: call getPageSummary() passing URL
-	//marshal struct into JSON, and write it
-	//to the response
+	// URL as the key
+	jbuf, err := ctx.redisClient.Get(URL).Bytes()
+	if err != nil && err != redis.Nil {
+		http.Error(w, "Error getting from cache: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// no error but returns empty
+	// so need to get it ourselves (marshall it)
+	if err == redis.Nil {
+		//TODO: call getPageSummary() passing URL
+		//marshal struct into JSON, and write it
+		//to the response
+		pgsum, err := getPageSummary(URL)
+		if err != nil && err != io.EOF {
+			http.Error(w, "Error getting page summary: "+err.Error(), http.StatusInternalServerError)
+			return // to stop
+		}
+
+		jbuf, err = json.Marshal(pgsum)
+		if err != nil {
+			http.Error(w, "Error marshalling json: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		ctx.redisClient.Set(URL, jbuf, time.Second*60)
+	}
+
+	w.Header().Add(headerContentType, contentTypeJSON)
+	w.Write(jbuf)
 }
 
 func main() {
@@ -89,7 +126,17 @@ func main() {
 	}
 	addr := host + ":" + port
 
-	http.HandleFunc("/v1/summary", SummaryHandler)
+	// connect to redis
+	ropts := redis.Options{
+		Addr: "localhost:6379", // hard code for now
+	}
+	rclient := redis.NewClient(&ropts) // take the address of variable using "&"
+	hctx := &HandlerContext{
+		redisClient: rclient,
+	}
+
+	// http.HandleFunc("/v1/summary", SummaryHandler)
+	// something is not working here ***********
 
 	fmt.Printf("listening at %s...\n", addr)
 	log.Fatal(http.ListenAndServe(addr, nil))
