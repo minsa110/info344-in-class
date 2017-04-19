@@ -1,3 +1,4 @@
+-- postgres schema
 create table tasks (
 	ID serial primary key,
 	title varchar(255),

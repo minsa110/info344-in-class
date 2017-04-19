@@ -6,6 +6,8 @@ type Store interface {
 	//returns the fully-populated Task or an error
 	Insert(newtask *NewTask) (*Task, error)
 	Get(ID interface{}) (*Task, error)
+	GetAll() ([]*Task, error)
+	Update(task *Task) error
 }
 
 // Interfaces
