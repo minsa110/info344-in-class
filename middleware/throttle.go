@@ -44,7 +44,12 @@ func throttleRequests(maxRequests int, duration time.Duration) Adapter {
 				numReqs = entry.(int)
 			}
 			numReqs++
-			// ...
+			// if numReqs > maxRequests {
+			// 	handler.ServeHTTP(w, r)
+			// 	return http.Error(http.StatusTooManyRequests)
+			// } else {
+			//     w.WriteHeader()
+			// }
 		})
 	}
 }
