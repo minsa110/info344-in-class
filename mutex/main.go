@@ -32,9 +32,14 @@ func main() {
 	//seed the random number generator
 	rand.Seed(time.Now().Unix())
 
-	//TODO: create a NewCache
+	//create a NewCache
 	//and run a bunch of getter/setter
 	//goroutines
+	c := NewCache()
+	for i := 0; i < 10; i++ {
+		go getter(c)
+		go setter(c)
+	}
 
 	//A go program will exit when
 	//the main() exits, and the
@@ -49,4 +54,6 @@ func main() {
 	fmt.Println("hit ctrl+c to quit")
 	quit := make(chan bool)
 	<-quit
+
+	c.Close()
 }
