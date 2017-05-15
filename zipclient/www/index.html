@@ -7,7 +7,8 @@
 <body>
     <script>
         // fetch("http://localhost:8000/zips/city/seattle")
-        fetch("http://138.68.253.45/zips/city/seattle")
+        // fetch("http://138.68.253.45/zips/city/seattle") // for go zipsvr
+        fetch("http://localhost/zips/city/seattle")
             .then(function(resp) {
                 return resp.json()
             })
